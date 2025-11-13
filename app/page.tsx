@@ -1,11 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SunCanvas from '@/components/SunCanvas';
 import TimeSlider from '@/components/TimeSlider';
 import LocationSelector from '@/components/LocationSelector';
 import SunInfo from '@/components/SunInfo';
+import GenerateButton from '@/components/GenerateButton';
+import AIContentSection from '@/components/AIContentSection';
 import { useSunPosition } from '@/hooks/useSunPosition';
+import { useAIGeneration } from '@/hooks/useAIGeneration';
 import { MAJOR_CITIES } from '@/lib/cities';
 import type { City } from '@/lib/cities';
 
@@ -13,6 +16,8 @@ export default function Home() {
   // デフォルトは東京
   const [selectedCity, setSelectedCity] = useState<City>(MAJOR_CITIES[0]);
   const [date, setDate] = useState<Date>(new Date());
+  const [apiKey, setApiKey] = useState('');
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
 
   // 太陽位置計算フック
   const {
@@ -24,6 +29,24 @@ export default function Home() {
     setTime,
     setLocation,
   } = useSunPosition(date, undefined, selectedCity.latitude, selectedCity.longitude);
+
+  // AI生成フック
+  const { content, loading, error, generate } = useAIGeneration();
+
+  // ローカルストレージからAPIキーを読み込み
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem('sun-app-api-key');
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+    }
+  }, []);
+
+  // APIキーをローカルストレージに保存
+  const handleApiKeySave = () => {
+    localStorage.setItem('sun-app-api-key', apiKey);
+    setShowApiKeyInput(false);
+    alert('APIキーを保存しました');
+  };
 
   // 都市選択ハンドラ
   const handleCitySelect = (city: City) => {
@@ -42,6 +65,16 @@ export default function Home() {
     if (!isNaN(newDate.getTime())) {
       setDate(newDate);
     }
+  };
+
+  // AI生成ハンドラ
+  const handleGenerate = () => {
+    if (!apiKey || apiKey.trim() === '') {
+      alert('APIキーを設定してください');
+      setShowApiKeyInput(true);
+      return;
+    }
+    generate(sunData, selectedCity.name, apiKey);
   };
 
   // 日付フォーマット（YYYY-MM-DD）
@@ -64,6 +97,47 @@ export default function Home() {
             世界各地の太陽の動きをビジュアル化
           </p>
         </div>
+
+        {/* APIキー設定ボタン */}
+        <div className="text-center">
+          <button
+            onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+            className="text-sm text-blue-600 hover:text-blue-800 underline"
+          >
+            {showApiKeyInput ? '設定を閉じる' : '⚙️ APIキー設定'}
+          </button>
+        </div>
+
+        {/* APIキー入力 */}
+        {showApiKeyInput && (
+          <div className="bg-white rounded-lg shadow-lg p-6 space-y-4">
+            <h3 className="font-bold text-gray-800">Google AI Studio APIキー設定</h3>
+            <p className="text-sm text-gray-600">
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                Google AI Studio
+              </a>
+              でAPIキーを取得してください
+            </p>
+            <input
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="APIキーを入力"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              onClick={handleApiKeySave}
+              className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+            >
+              保存
+            </button>
+          </div>
+        )}
 
         {/* コントロールパネル */}
         <div className="bg-white rounded-lg shadow-lg p-6 space-y-6">
@@ -108,10 +182,21 @@ export default function Home() {
         {/* 太陽情報 */}
         <SunInfo sunData={sunData} polarCondition={polarCondition} />
 
+        {/* AI生成セクション */}
+        <div className="bg-white rounded-lg shadow-lg p-6 space-y-6">
+          <h2 className="text-2xl font-bold text-gray-800 text-center">
+            🤖 AI生成コンテンツ
+          </h2>
+
+          <GenerateButton onClick={handleGenerate} loading={loading} />
+
+          <AIContentSection content={content} error={error} />
+        </div>
+
         {/* フッター */}
         <div className="text-center text-sm text-gray-500 py-4">
           <p>
-            計算ライブラリ: SunCalc.js |
+            計算ライブラリ: SunCalc.js | AI: Google Gemini |
             データは参考値です
           </p>
         </div>
