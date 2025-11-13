@@ -1,0 +1,45 @@
+# ナノバナナ用プロンプト：App 32「太陽の動き表示」
+
+## メイン画面の完成イメージ
+
+```
+Modern web application UI design for a sun movement tracking app.
+Beautiful gradient sky background transitioning from warm orange-pink at bottom to light blue at top (afternoon sky).
+
+Center: Realistic sun illustration with soft glow and rays, positioned at 45-degree angle showing afternoon position.
+Arc trajectory line showing sun's path across the sky, dotted white line from sunrise to sunset.
+Markers on arc: 🌅 Sunrise point (left) and 🌇 Sunset point (right) with times "6:24" and "17:08"
+
+Top section:
+- Date selector "2025年1月13日 (月)"
+- Location dropdown "東京 🌏" with other cities (London, NYC, Sydney, Beijing, Singapore)
+
+Middle section:
+- Time slider with current time "14:30" highlighted
+- Sun position indicator following the slider
+
+Bottom section:
+- Sun information panel:
+  - Current altitude "太陽高度: 32.5°"
+  - Azimuth "方位角: 152.3°"
+
+Bottom area:
+- AI section with sparkle icon ✨
+- Cards showing: "太陽の豆知識", "UV注意報", "撮影タイミング" with AI-generated content
+
+Color scheme:
+- Sky gradient: #FFB366 (bottom) to #87CEEB (top)
+- Sun: Bright yellow-orange with glow
+- Text: White with shadow for readability
+- UI elements: White with subtle transparency
+
+Typography: Clean modern Japanese font
+Style: Warm, educational, nature-focused app aesthetic
+Layout: Vertical, centered, mobile-friendly responsive design
+
+--ar 9:16 --style digital illustration --quality high
+```
+
+## 使い方
+このプロンプトをナノバナナにコピー&ペーストして画像生成してください。
+生成された画像を `complete-image.png` として保存してください。
