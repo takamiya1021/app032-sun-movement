@@ -70,7 +70,7 @@ export default function SunCanvas({
       height
     );
 
-    drawSunPath(ctx, width, height, sunrisePos, sunsetPos, currentPos);
+    drawSunPath(ctx, width, height, sunrisePos, sunsetPos);
 
     // 太陽を描画
     if (sunData.altitude > -6) {

@@ -49,7 +49,7 @@ ${dateStr}、${cityName}での太陽（${phaseName}）について、
 /**
  * 紫外線対策アドバイスを生成するプロンプト
  */
-export function generateUVAdvice(sunData: SunPositionData, cityName: string): string {
+export function generateUVAdvice(sunData: SunPositionData): string {
   const dateStr = sunData.date.toLocaleDateString('ja-JP', {
     month: 'long',
   });
@@ -138,7 +138,7 @@ export async function generateAllSunContent(
     const [trivia, message, uvAdvice, photoTiming] = await Promise.all([
       callGeminiAPI(generateSunTrivia(sunData, cityName), apiKey),
       callGeminiAPI(generateSunMessage(sunData, cityName), apiKey),
-      callGeminiAPI(generateUVAdvice(sunData, cityName), apiKey),
+      callGeminiAPI(generateUVAdvice(sunData), apiKey),
       callGeminiAPI(generatePhotoTiming(sunData, cityName), apiKey),
     ]);
 

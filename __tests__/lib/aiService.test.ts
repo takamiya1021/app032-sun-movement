@@ -44,7 +44,7 @@ describe('AIサービス', () => {
 
   describe('generateUVAdvice', () => {
     it('紫外線対策アドバイスを生成するプロンプトを作成できる', () => {
-      const prompt = generateUVAdvice(mockSunData, '東京');
+      const prompt = generateUVAdvice(mockSunData);
 
       expect(prompt).toContain('紫外線');
       expect(prompt).toBeTruthy();

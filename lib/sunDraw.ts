@@ -95,15 +95,13 @@ export function drawSun(
  * @param height - Canvasの高さ
  * @param sunrisePos - 日の出位置
  * @param sunsetPos - 日の入り位置
- * @param currentPos - 現在の太陽位置
  */
 export function drawSunPath(
   ctx: CanvasRenderingContext2D,
   width: number,
   height: number,
   sunrisePos: Position,
-  sunsetPos: Position,
-  currentPos: Position
+  sunsetPos: Position
 ): void {
   // 軌跡のパスを描画（点線）
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';

@@ -77,9 +77,8 @@ describe('Canvas描画ロジック', () => {
     it('太陽の軌跡を描画できる', () => {
       const sunrisePos: Position = { x: 100, y: 400 };
       const sunsetPos: Position = { x: 400, y: 400 };
-      const currentPos: Position = { x: 250, y: 200 };
 
-      drawSunPath(ctx, canvas.width, canvas.height, sunrisePos, sunsetPos, currentPos);
+      drawSunPath(ctx, canvas.width, canvas.height, sunrisePos, sunsetPos);
 
       // パスが描画されたことを確認
       expect(ctx.beginPath).toHaveBeenCalled();
@@ -89,9 +88,8 @@ describe('Canvas描画ロジック', () => {
     it('日の出と日の入りのマーカーを描画できる', () => {
       const sunrisePos: Position = { x: 100, y: 400 };
       const sunsetPos: Position = { x: 400, y: 400 };
-      const currentPos: Position = { x: 250, y: 200 };
 
-      drawSunPath(ctx, canvas.width, canvas.height, sunrisePos, sunsetPos, currentPos);
+      drawSunPath(ctx, canvas.width, canvas.height, sunrisePos, sunsetPos);
 
       // マーカー用の円が描画された
       expect(ctx.arc).toHaveBeenCalled();

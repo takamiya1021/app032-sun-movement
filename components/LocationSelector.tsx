@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { MAJOR_CITIES, findCity, getCityNames } from '@/lib/cities';
+import { findCity, getCityNames } from '@/lib/cities';
 import type { City } from '@/lib/cities';
 
 interface LocationSelectorProps {
