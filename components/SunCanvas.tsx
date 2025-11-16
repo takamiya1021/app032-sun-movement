@@ -173,10 +173,18 @@ export default function SunCanvas({
     height: number,
     viewport: Viewport
   ): void {
-    const points: Position[] = [];
+    const segments: Position[][] = [];
+    let currentSegment: Position[] = [];
 
-    // 1時間ごとの太陽位置を計算
-    for (let hour = 0; hour <= 24; hour++) {
+    const pushSegment = () => {
+      if (currentSegment.length >= 2) {
+        segments.push(currentSegment);
+      }
+      currentSegment = [];
+    };
+
+    const step = 0.5;
+    for (let hour = 0; hour <= 24; hour += step) {
       const sunData = calculateSunPosition(date, hour, latitude, longitude);
       if (sunData.altitude > -6) {
         const pos = horizontalToScreen(
@@ -187,24 +195,37 @@ export default function SunCanvas({
           height
         );
         if (pos) {
-          points.push({ x: pos.x, y: pos.y });
+          currentSegment.push({ x: pos.x, y: pos.y });
+        } else if (currentSegment.length) {
+          pushSegment();
         }
+      } else if (currentSegment.length) {
+        pushSegment();
       }
     }
 
-    // 軌跡を描画
-    if (points.length < 2) return;
+    if (currentSegment.length) {
+      pushSegment();
+    }
+
+    if (!segments.length) {
+      return;
+    }
 
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
     ctx.lineWidth = 2;
     ctx.setLineDash([5, 5]);
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length; i++) {
-      ctx.lineTo(points[i].x, points[i].y);
-    }
-    ctx.stroke();
-    ctx.setLineDash([]); // 点線をリセット
+
+    segments.forEach((segment) => {
+      ctx.beginPath();
+      ctx.moveTo(segment[0].x, segment[0].y);
+      for (let i = 1; i < segment.length; i++) {
+        ctx.lineTo(segment[i].x, segment[i].y);
+      }
+      ctx.stroke();
+    });
+
+    ctx.setLineDash([]);
   }
 
   return (
