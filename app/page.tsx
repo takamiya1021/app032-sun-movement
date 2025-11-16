@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import SunCanvas from '@/components/SunCanvas';
 import TimeSlider from '@/components/TimeSlider';
+import AnimationControls from '@/components/AnimationControls';
 import LocationSelector from '@/components/LocationSelector';
 import SunInfo from '@/components/SunInfo';
 import GenerateButton from '@/components/GenerateButton';
@@ -18,6 +19,8 @@ export default function Home() {
   const [date, setDate] = useState<Date>(new Date());
   const [apiKey, setApiKey] = useState('');
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [viewAzimuth, setViewAzimuth] = useState(180);
+  const [followSun, setFollowSun] = useState(false);
 
   // 太陽位置計算フック
   const {
@@ -84,6 +87,25 @@ export default function Home() {
     const day = d.getDate().toString().padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
+
+  const formattedDirection = useMemo(() => {
+    const labels = ['北', '北東', '東', '南東', '南', '南西', '西', '北西'];
+    const index = Math.round(viewAzimuth / 45) % labels.length;
+    return labels[index];
+  }, [viewAzimuth]);
+
+  // 追従モード: 太陽方位に視点を合わせる
+  useEffect(() => {
+    if (!followSun) return;
+    const targetAzimuth = ((sunData.azimuth % 360) + 360) % 360;
+    setViewAzimuth((prev) => {
+      const diff = Math.abs(prev - targetAzimuth);
+      if (diff < 0.1) {
+        return prev;
+      }
+      return targetAzimuth;
+    });
+  }, [followSun, sunData.azimuth]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 p-4 md:p-8">
@@ -157,6 +179,55 @@ export default function Home() {
           {/* 時刻選択 */}
           <TimeSlider time={time} onChange={setTime} />
 
+          {/* アニメーションコントロール */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              🎬 アニメーション
+            </label>
+            <AnimationControls time={time} onTimeChange={setTime} />
+          </div>
+
+          {/* 視点コントロール */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              🧭 視点方向
+            </label>
+            <div className="flex items-center gap-3 mb-2">
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={followSun}
+                  onChange={(e) => setFollowSun(e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                太陽に追従
+              </label>
+              {followSun && (
+                <span className="text-xs text-blue-600">視点は太陽の方位に固定中</span>
+              )}
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="360"
+              step="1"
+              value={viewAzimuth}
+              onChange={(e) => setViewAzimuth(parseInt(e.target.value, 10))}
+              disabled={followSun}
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+            />
+            <div className="flex justify-between text-xs text-gray-600 mt-1">
+              <span>
+                向き: {formattedDirection}
+              </span>
+              <span>{Math.round(viewAzimuth)}°</span>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              キャンバスをドラッグして視点を回転できます
+              {followSun && '（追従中は無効）'}
+            </p>
+          </div>
+
           {/* 位置選択 */}
           <LocationSelector
             selectedCity={selectedCity}
@@ -176,6 +247,9 @@ export default function Home() {
             longitude={longitude}
             width={800}
             height={500}
+            viewAzimuth={viewAzimuth}
+            onViewAzimuthChange={setViewAzimuth}
+            followSun={followSun}
           />
         </div>
 
