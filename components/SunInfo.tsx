@@ -1,23 +1,24 @@
 'use client';
 
 import type { SunPositionData, PolarCondition } from '@/types/sun';
+import { formatTimeInTimeZone } from '@/lib/timezone';
 
 interface SunInfoProps {
   sunData: SunPositionData;
   polarCondition: PolarCondition;
+  timeZone: string;
+  cityName?: string;
 }
 
 /**
  * 太陽情報表示コンポーネント
  */
-export default function SunInfo({ sunData, polarCondition }: SunInfoProps) {
+export default function SunInfo({ sunData, polarCondition, timeZone, cityName }: SunInfoProps) {
   const formatTime = (date: Date) => {
     if (isNaN(date.getTime())) {
       return '--:--';
     }
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
+    return formatTimeInTimeZone(date, timeZone);
   };
 
   const formatDuration = (hours: number) => {
@@ -55,8 +56,11 @@ export default function SunInfo({ sunData, polarCondition }: SunInfoProps) {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
-      <h3 className="text-lg font-bold text-gray-800 border-b pb-2">
-        ☀️ 太陽情報
+      <h3 className="text-lg font-bold text-gray-800 border-b pb-2 flex flex-col">
+        <span>☀️ 太陽情報</span>
+        {cityName && (
+          <span className="text-xs text-gray-500 font-normal">{cityName} 現地時間</span>
+        )}
       </h3>
 
       <div className="grid grid-cols-2 gap-4">

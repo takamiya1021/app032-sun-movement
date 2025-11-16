@@ -5,12 +5,12 @@ describe('太陽位置計算ロジック', () => {
     it('東京の2025年1月13日正午頃の太陽位置を計算できる', () => {
       // 2025年1月13日
       const date = new Date(2025, 0, 13);
-      // 東京の南中時刻は約 02:51 UTC = 11:51 JST なので、UTC 3時（JST 12時）で計算
-      const result = calculateSunPosition(date, 3, 35.6762, 139.6503);
+      // 東京の正午（現地時間）で計算
+      const result = calculateSunPosition(date, 12, 35.6762, 139.6503, 'Asia/Tokyo');
 
       // 基本情報の確認
       expect(result.date).toEqual(date);
-      expect(result.time).toBe(3);
+      expect(result.time).toBe(12);
       expect(result.latitude).toBe(35.6762);
       expect(result.longitude).toBe(139.6503);
 
@@ -29,7 +29,7 @@ describe('太陽位置計算ロジック', () => {
 
     it('夏至の東京では昼の長さが長い', () => {
       const summerSolstice = new Date(2025, 5, 21); // 2025年6月21日
-      const result = calculateSunPosition(summerSolstice, 12, 35.6762, 139.6503);
+      const result = calculateSunPosition(summerSolstice, 12, 35.6762, 139.6503, 'Asia/Tokyo');
 
       // 夏至の昼の長さは14時間程度
       expect(result.dayLength).toBeGreaterThan(14);
@@ -38,7 +38,7 @@ describe('太陽位置計算ロジック', () => {
 
     it('冬至の東京では昼の長さが短い', () => {
       const winterSolstice = new Date(2025, 11, 22); // 2025年12月22日
-      const result = calculateSunPosition(winterSolstice, 12, 35.6762, 139.6503);
+      const result = calculateSunPosition(winterSolstice, 12, 35.6762, 139.6503, 'Asia/Tokyo');
 
       // 冬至の昼の長さは10時間程度
       expect(result.dayLength).toBeGreaterThan(9);
@@ -47,7 +47,7 @@ describe('太陽位置計算ロジック', () => {
 
     it('赤道直下（シンガポール）では一年中昼の長さがほぼ12時間', () => {
       const date = new Date(2025, 0, 13); // 2025年1月13日
-      const result = calculateSunPosition(date, 12, 1.3521, 103.8198);
+      const result = calculateSunPosition(date, 12, 1.3521, 103.8198, 'Asia/Singapore');
 
       // 赤道付近では昼の長さは約12時間
       expect(result.dayLength).toBeGreaterThan(11.5);
@@ -56,10 +56,10 @@ describe('太陽位置計算ロジック', () => {
 
     it('南半球（シドニー）では季節が逆転する', () => {
       const june = new Date(2025, 5, 21); // 2025年6月21日（南半球の冬）
-      const resultWinter = calculateSunPosition(june, 12, -33.8688, 151.2093);
+      const resultWinter = calculateSunPosition(june, 12, -33.8688, 151.2093, 'Australia/Sydney');
 
       const december = new Date(2025, 11, 22); // 2025年12月22日（南半球の夏）
-      const resultSummer = calculateSunPosition(december, 12, -33.8688, 151.2093);
+      const resultSummer = calculateSunPosition(december, 12, -33.8688, 151.2093, 'Australia/Sydney');
 
       // 南半球では6月（冬）の昼が短く、12月（夏）の昼が長い
       expect(resultWinter.dayLength).toBeLessThan(resultSummer.dayLength);

@@ -1,5 +1,6 @@
 import SunCalc from 'suncalc';
 import type { SunPositionData, PolarCondition } from '@/types/sun';
+import { makeZonedDate, extractDateParts } from '@/lib/timezone';
 
 /**
  * 太陽位置を計算する
@@ -14,17 +15,21 @@ export function calculateSunPosition(
   date: Date,
   time: number,
   latitude: number,
-  longitude: number
+  longitude: number,
+  timeZone: string
 ): SunPositionData {
-  // 指定時刻のDateオブジェクトを作成（ローカルタイムで）
-  const dateTime = new Date(date);
-  dateTime.setHours(Math.floor(time), (time % 1) * 60, 0, 0);
+  const { year, month, day } = extractDateParts(date);
+  const hours = Math.floor(time);
+  const minutes = Math.round((time % 1) * 60);
 
-  // SunCalc.jsで太陽位置を計算
+  const dateTime = makeZonedDate(
+    { year, month, day, hour: hours, minute: minutes, second: 0 },
+    timeZone
+  );
+
   const position = SunCalc.getPosition(dateTime, latitude, longitude);
-  // 日の出・日の入りは指定された日付で計算
-  const timesDate = new Date(date);
-  timesDate.setHours(12, 0, 0, 0); // 正午を基準にして日の出・日の入りを計算
+
+  const timesDate = makeZonedDate({ year, month, day, hour: 12, minute: 0 }, timeZone);
   const times = SunCalc.getTimes(timesDate, latitude, longitude);
 
   // ラジアンから度に変換
@@ -49,6 +54,7 @@ export function calculateSunPosition(
     sunset: times.sunset,
     solarNoon: times.solarNoon,
     dayLength,
+    timeZone,
   };
 }
 

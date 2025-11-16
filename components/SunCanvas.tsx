@@ -17,12 +17,44 @@ interface SunCanvasProps {
   time: number;
   latitude: number;
   longitude: number;
+  timeZone: string;
   width?: number;
   height?: number;
   viewAzimuth?: number;
   fov?: number;
   onViewAzimuthChange?: (azimuth: number) => void;
   followSun?: boolean;
+  autoCamera?: boolean;
+  showSunPath?: boolean;
+}
+
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+function computeCameraTilt(altitude: number): number {
+  if (altitude < -10) {
+    return -12;
+  }
+  if (altitude < 5) {
+    return altitude * 0.5 - 4;
+  }
+  if (altitude < 45) {
+    return -1 + (altitude - 5) * 0.8;
+  }
+  if (altitude < 70) {
+    return 31 + (altitude - 45) * 0.9;
+  }
+  return 53 + (altitude - 70) * 0.6;
+}
+
+function computeDynamicFov(altitude: number, baseFov: number): number {
+  const maxFov = clamp(baseFov, 90, 130);
+  const minFov = 68;
+  if (altitude <= 0) {
+    return maxFov;
+  }
+  const ratio = Math.min(altitude / 90, 1);
+  const adjusted = maxFov - (maxFov - minFov) * ratio;
+  return clamp(adjusted, minFov, maxFov);
 }
 
 const normalizeAngle = (value: number) => {
@@ -44,21 +76,32 @@ export default function SunCanvas({
   fov = 120,
   onViewAzimuthChange,
   followSun = false,
+  autoCamera = true,
+  showSunPath = true,
+  timeZone,
 }: SunCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const azimuthRef = useRef(viewAzimuth);
+
+  const sunData = useMemo(() => {
+    return calculateSunPosition(date, time, latitude, longitude, timeZone);
+  }, [date, time, latitude, longitude, timeZone]);
 
   useEffect(() => {
     azimuthRef.current = viewAzimuth;
   }, [viewAzimuth]);
 
   const viewport = useMemo<Viewport>(() => {
+    const tilt = autoCamera ? computeCameraTilt(sunData.altitude) : DEFAULT_VIEWPORT.centerAltitude;
+    const dynamicFov = autoCamera ? computeDynamicFov(sunData.altitude, fov) : fov;
+
     return {
       ...DEFAULT_VIEWPORT,
       centerAzimuth: viewAzimuth,
-      fov,
+      centerAltitude: clamp(tilt, -10, 50),
+      fov: dynamicFov,
     };
-  }, [viewAzimuth, fov]);
+  }, [viewAzimuth, fov, autoCamera, sunData.altitude]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -73,9 +116,6 @@ export default function SunCanvas({
     canvas.height = height * dpr;
     ctx.scale(dpr, dpr);
 
-    // 太陽位置を計算
-    const sunData = calculateSunPosition(date, time, latitude, longitude);
-
     // 空を描画
     drawSky(ctx, width, height, time, sunData.altitude, viewport);
 
@@ -87,19 +127,21 @@ export default function SunCanvas({
     drawMountainSilhouettes(ctx, viewport, width, height);
 
     // 太陽の軌跡を描画（1時間ごとの位置）
-    drawSunPathWithProjection(
-      ctx,
-      date,
-      latitude,
-      longitude,
-      width,
-      height,
-      viewport
-    );
+    if (showSunPath) {
+      drawSunPathWithProjection(
+        ctx,
+        date,
+        latitude,
+        longitude,
+        width,
+        height,
+        viewport,
+        timeZone
+      );
+    }
 
     // 太陽を描画（3D投影）
     if (sunData.altitude > -6) {
-      // 太陽が地平線下6度より上にある場合のみ描画
       const sunPos = horizontalToScreen(
         sunData.azimuth,
         sunData.altitude,
@@ -113,7 +155,7 @@ export default function SunCanvas({
         drawSun(ctx, position, sunData.altitude);
       }
     }
-  }, [date, time, latitude, longitude, width, height, viewport]);
+  }, [sunData, width, height, viewport, time, date, latitude, longitude, showSunPath, timeZone]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -171,7 +213,8 @@ export default function SunCanvas({
     longitude: number,
     width: number,
     height: number,
-    viewport: Viewport
+    viewport: Viewport,
+    timeZone: string
   ): void {
     const segments: Position[][] = [];
     let currentSegment: Position[] = [];
@@ -185,7 +228,7 @@ export default function SunCanvas({
 
     const step = 0.5;
     for (let hour = 0; hour <= 24; hour += step) {
-      const sunData = calculateSunPosition(date, hour, latitude, longitude);
+      const sunData = calculateSunPosition(date, hour, latitude, longitude, timeZone);
       if (sunData.altitude > -6) {
         const pos = horizontalToScreen(
           sunData.azimuth,

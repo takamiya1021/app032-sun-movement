@@ -16,22 +16,32 @@ import type { City } from '@/lib/cities';
 export default function Home() {
   // デフォルトは東京
   const [selectedCity, setSelectedCity] = useState<City>(MAJOR_CITIES[0]);
-  const [date, setDate] = useState<Date>(new Date());
   const [apiKey, setApiKey] = useState('');
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const [viewAzimuth, setViewAzimuth] = useState(180);
   const [followSun, setFollowSun] = useState(false);
+  const [showSunPath, setShowSunPath] = useState(true);
 
   // 太陽位置計算フック
   const {
+    date,
     time,
     latitude,
     longitude,
+    timeZone,
     sunData,
     polarCondition,
+    setDate: setSunDate,
     setTime,
     setLocation,
-  } = useSunPosition(date, undefined, selectedCity.latitude, selectedCity.longitude);
+    setTimeZone,
+  } = useSunPosition(
+    new Date(),
+    undefined,
+    selectedCity.latitude,
+    selectedCity.longitude,
+    selectedCity.timezone
+  );
 
   // AI生成フック
   const { content, loading, error, generate } = useAIGeneration();
@@ -55,6 +65,7 @@ export default function Home() {
   const handleCitySelect = (city: City) => {
     setSelectedCity(city);
     setLocation(city.latitude, city.longitude);
+    setTimeZone(city.timezone);
   };
 
   // カスタム位置ハンドラ
@@ -66,7 +77,7 @@ export default function Home() {
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newDate = new Date(e.target.value);
     if (!isNaN(newDate.getTime())) {
-      setDate(newDate);
+      setSunDate(newDate);
     }
   };
 
@@ -206,6 +217,15 @@ export default function Home() {
                 <span className="text-xs text-blue-600">視点は太陽の方位に固定中</span>
               )}
             </div>
+            <div className="flex items-center gap-2 text-sm text-gray-700 mb-2">
+              <input
+                type="checkbox"
+                checked={showSunPath}
+                onChange={(e) => setShowSunPath(e.target.checked)}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              軌跡を表示
+            </div>
             <input
               type="range"
               min="0"
@@ -250,11 +270,18 @@ export default function Home() {
             viewAzimuth={viewAzimuth}
             onViewAzimuthChange={setViewAzimuth}
             followSun={followSun}
+            timeZone={timeZone}
+            showSunPath={showSunPath}
           />
         </div>
 
         {/* 太陽情報 */}
-        <SunInfo sunData={sunData} polarCondition={polarCondition} />
+        <SunInfo
+          sunData={sunData}
+          polarCondition={polarCondition}
+          timeZone={timeZone}
+          cityName={selectedCity.name}
+        />
 
         {/* AI生成セクション */}
         <div className="bg-white rounded-lg shadow-lg p-6 space-y-6">

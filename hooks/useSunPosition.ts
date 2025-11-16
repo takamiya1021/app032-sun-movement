@@ -17,7 +17,8 @@ export function useSunPosition(
   initialDate: Date = new Date(),
   initialTime?: number,
   initialLatitude: number = 35.6762,
-  initialLongitude: number = 139.6503
+  initialLongitude: number = 139.6503,
+  initialTimeZone: string = 'UTC'
 ) {
   const [date, setDate] = useState<Date>(initialDate);
   const [time, setTime] = useState<number>(
@@ -25,11 +26,12 @@ export function useSunPosition(
   );
   const [latitude, setLatitude] = useState<number>(initialLatitude);
   const [longitude, setLongitude] = useState<number>(initialLongitude);
+  const [timeZone, setTimeZone] = useState<string>(initialTimeZone);
 
   // 太陽位置データを計算
   const sunData = useMemo<SunPositionData>(() => {
-    return calculateSunPosition(date, time, latitude, longitude);
-  }, [date, time, latitude, longitude]);
+    return calculateSunPosition(date, time, latitude, longitude, timeZone);
+  }, [date, time, latitude, longitude, timeZone]);
 
   // 極地方の条件をチェック
   const polarCondition = useMemo<PolarCondition>(() => {
@@ -50,6 +52,7 @@ export function useSunPosition(
     time,
     latitude,
     longitude,
+    timeZone,
     sunData,
     polarCondition,
 
@@ -59,5 +62,6 @@ export function useSunPosition(
     setLocation,
     setLatitude,
     setLongitude,
+    setTimeZone,
   };
 }

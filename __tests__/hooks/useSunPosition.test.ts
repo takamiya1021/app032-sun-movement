@@ -3,7 +3,9 @@ import { useSunPosition } from '@/hooks/useSunPosition';
 
 describe('useSunPosition', () => {
   it('初期状態で東京の現在時刻の太陽位置を計算する', () => {
-    const { result } = renderHook(() => useSunPosition());
+    const { result } = renderHook(() =>
+      useSunPosition(new Date(), undefined, 35.6762, 139.6503, 'Asia/Tokyo')
+    );
 
     expect(result.current.sunData).toBeDefined();
     expect(result.current.sunData.latitude).toBe(35.6762); // 東京の緯度
@@ -11,7 +13,9 @@ describe('useSunPosition', () => {
   });
 
   it('日付を変更すると太陽位置が再計算される', () => {
-    const { result } = renderHook(() => useSunPosition());
+    const { result } = renderHook(() =>
+      useSunPosition(new Date(), undefined, 35.6762, 139.6503, 'Asia/Tokyo')
+    );
 
     const initialDayLength = result.current.sunData.dayLength;
 
@@ -25,18 +29,20 @@ describe('useSunPosition', () => {
   });
 
   it('時刻を変更すると太陽高度が変化する', () => {
-    const { result } = renderHook(() => useSunPosition());
+    const { result } = renderHook(() =>
+      useSunPosition(new Date(), undefined, 35.6762, 139.6503, 'Asia/Tokyo')
+    );
 
     act(() => {
-      // 正午に設定
-      result.current.setTime(3); // UTC 3時 = JST 12時
+      // 正午に設定（現地時間）
+      result.current.setTime(12);
     });
 
     const noonAltitude = result.current.sunData.altitude;
 
     act(() => {
-      // 夕方に設定
-      result.current.setTime(8); // UTC 8時 = JST 17時
+      // 夕方に設定（現地時間）
+      result.current.setTime(17);
     });
 
     // 夕方の方が太陽が低い
@@ -44,7 +50,9 @@ describe('useSunPosition', () => {
   });
 
   it('位置を変更すると太陽位置が再計算される', () => {
-    const { result } = renderHook(() => useSunPosition());
+    const { result } = renderHook(() =>
+      useSunPosition(new Date(), undefined, 35.6762, 139.6503, 'Asia/Tokyo')
+    );
 
     act(() => {
       // シンガポール（赤道付近）に変更

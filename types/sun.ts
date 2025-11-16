@@ -12,6 +12,7 @@ export interface SunPositionData {
   sunset: Date;         // 日の入り時刻
   solarNoon: Date;      // 南中時刻（太陽が最も高い時）
   dayLength: number;    // 昼の長さ（時間）
+  timeZone?: string;    // 計算に使用したタイムゾーン
 }
 
 /**
