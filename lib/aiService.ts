@@ -17,8 +17,8 @@ export function generateSunTrivia(sunData: SunPositionData, cityName: string): s
 
   return `あなたは天文学と神話に詳しい専門家です。
 ${dateStr}の${cityName}の太陽（高度${sunData.altitude.toFixed(1)}度）について、
-興味深い豆知識を1つ、150文字程度で教えてください。
-太陽にまつわる神話・文化・科学的知識から選んでください。`;
+興味深い豆知識を1つ、600文字程度で詳しく教えてください。
+太陽にまつわる神話・文化・科学的知識から選び、背景や関連する話も含めて説明してください。`;
 }
 
 /**
@@ -43,7 +43,8 @@ export function generateSunMessage(sunData: SunPositionData, cityName: string): 
 
   return `あなたは太陽と自然に詳しいアドバイザーです。
 ${dateStr}、${cityName}での太陽（${phaseName}）について、
-前向きで心地よいメッセージを100文字程度で伝えてください。`;
+前向きで心地よいメッセージを400文字程度で伝えてください。
+その時間帯の太陽の特徴や、心身への影響なども含めて語ってください。`;
 }
 
 /**
@@ -57,8 +58,9 @@ export function generateUVAdvice(sunData: SunPositionData): string {
 
   return `あなたは皮膚科医です。
 ${dateStr}、時刻${hour}時頃の太陽高度${sunData.altitude.toFixed(1)}度での
-紫外線対策アドバイスを100文字程度で教えてください。
-季節・時間帯を考慮してください。`;
+紫外線対策アドバイスを400文字程度で詳しく教えてください。
+季節・時間帯を考慮し、具体的な対策方法（日焼け止めの選び方、服装、帽子など）や
+紫外線の強さの説明も含めてください。`;
 }
 
 /**
@@ -79,7 +81,8 @@ ${dateStr}、${cityName}での撮影について、
 - 日の出時刻: ${sunriseTime}
 - 日の入り時刻: ${sunsetTime}
 を踏まえ、ゴールデンアワー・マジックアワーの
-ベストタイミングを100文字程度で提案してください。`;
+ベストタイミングを400文字程度で詳しく提案してください。
+具体的な時間帯、光の特徴、おすすめの被写体、カメラ設定のヒントなども含めてください。`;
 }
 
 /**

@@ -1,225 +1,209 @@
-# ☀️ 太陽の動き表示
+<a name="readme-top"></a>
 
-世界各地の太陽の動きをビジュアル化するWebアプリケーション
+<!-- PROJECT SHIELDS -->
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge)](https://github.com/yourusername/app032-sun-movement)
+[![Tests](https://img.shields.io/badge/tests-31%2F32%20passed-brightgreen?style=for-the-badge)](https://github.com/yourusername/app032-sun-movement)
+[![PWA](https://img.shields.io/badge/PWA-enabled-blue?style=for-the-badge)](https://github.com/yourusername/app032-sun-movement)
+[![MIT License][license-shield]][license-url]
 
-![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
-![Tests](https://img.shields.io/badge/tests-31%2F32%20passed-brightgreen)
-![PWA](https://img.shields.io/badge/PWA-enabled-blue)
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/yourusername/app032-sun-movement">
+    <div style="font-size: 80px;">☀️</div>
+  </a>
 
-## 📋 概要
+  <h3 align="center">太陽の動き表示 (Sun Movement Display)</h3>
 
-「太陽の動き表示」は、世界中の任意の場所と日時における太陽の位置を計算し、美しいビジュアルで表示するアプリケーションです。SunCalc.jsによる正確な天文計算と、Google Gemini AIによる太陽関連情報の生成を組み合わせています。
+  <p align="center">
+    世界各地の太陽の動きを美しくビジュアル化するWebアプリケーション
+    <br />
+    <a href="https://github.com/yourusername/app032-sun-movement"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://github.com/yourusername/app032-sun-movement">View Demo</a>
+    ·
+    <a href="https://github.com/yourusername/app032-sun-movement/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/yourusername/app032-sun-movement/issues">Request Feature</a>
+  </p>
+</div>
 
-### ✨ 主な機能
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgments">Acknowledgments</a></li>
+  </ol>
+</details>
 
-- 🌍 **世界17都市対応** - 東京、ロンドン、ニューヨーク、トロムソ（白夜体験可能）など
-- 📍 **緯度経度手動入力** - 任意の地点の太陽の動きを確認
-- 🎨 **時間帯別の空の色変化** - 夜明け前、朝焼け、昼、夕焼け、夜の5パターン
-- 🌅 **太陽の軌跡表示** - 日の出から日の入りまでの軌跡を可視化
-- 📊 **詳細な太陽情報** - 日の出・日の入り・南中時刻・太陽高度・方位角・昼の長さ
-- 🤖 **AI生成コンテンツ** - Google Geminiによる豆知識・メッセージ・UV対策・撮影アドバイス
-- 📱 **PWA対応** - オフライン動作、インストール可能
-- 🌙 **白夜・極夜対応** - 極地方の特殊な太陽の動きも正確に表示
+<!-- ABOUT THE PROJECT -->
+## About The Project
 
-## 🚀 クイックスタート
+[![Product Name Screen Shot][product-screenshot]](https://example.com)
 
-### 前提条件
+「太陽の動き表示」は、世界中の任意の場所と日時における太陽の位置を計算し、直感的なビジュアルで表示するアプリケーションです。
 
-- Node.js 18以上
-- npm または pnpm
+SunCalc.jsによる高精度な天文計算と、Google Gemini AIによるコンテキストに応じた情報生成を組み合わせることで、単なるツールを超えた学習・体験プラットフォームを提供します。白夜や極夜といった特殊な現象も正確に再現し、自宅にいながら世界の空を旅することができます。
 
-### インストール
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-```bash
-# リポジトリをクローン
-git clone https://github.com/yourusername/app032-sun-movement.git
-cd app032-sun-movement
+### Built With
 
-# 依存関係をインストール
-npm install
+* [![Next][Next.js]][Next-url]
+* [![React][React.js]][React-url]
+* [![TypeScript][TypeScript]][TypeScript-url]
+* [![TailwindCSS][TailwindCSS]][TailwindCSS-url]
+* [![SunCalc][SunCalc]][SunCalc-url]
+* [![Gemini][Gemini]][Gemini-url]
 
-# 開発サーバー起動
-npm run dev
-```
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-ブラウザで http://localhost:3000 を開きます。
+<!-- GETTING STARTED -->
+## Getting Started
 
-### AI機能を使用する場合
+ローカル環境でプロジェクトをセットアップする手順です。
 
-1. [Google AI Studio](https://aistudio.google.com/app/apikey) でAPIキーを取得
-2. アプリ内の「⚙️ APIキー設定」からAPIキーを入力・保存
-3. 「✨ AI情報を生成」ボタンをクリック
+### Prerequisites
 
-## 🛠️ 技術スタック
+* Node.js 18.0 or higher
+* npm
+  ```sh
+  npm install npm@latest -g
+  ```
 
-### フロントエンド
-- **Next.js 14.2** - React フレームワーク (App Router)
-- **TypeScript 5** - 型安全性
-- **Tailwind CSS 3.4** - ユーティリティファーストCSS
+### Installation
 
-### ライブラリ
-- **SunCalc.js 1.9** - 太陽位置計算
-- **next-pwa** - PWA対応
+1. Google AI StudioでAPIキーを取得 (AI機能を使用する場合)
+   [https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)
+2. リポジトリをクローン
+   ```sh
+   git clone https://github.com/yourusername/app032-sun-movement.git
+   ```
+3. 依存パッケージをインストール
+   ```sh
+   npm install
+   ```
+4. 開発サーバーを起動
+   ```sh
+   npm run dev
+   ```
+5. ブラウザで `http://localhost:3000` を開く
 
-### AI
-- **Google AI Studio API** - Gemini Pro モデル
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### テスト
-- **Jest** - テストフレームワーク
-- **React Testing Library** - コンポーネントテスト
-- **jest-canvas-mock** - Canvas APIモック
+<!-- USAGE EXAMPLES -->
+## Usage
 
-## 📁 プロジェクト構造
+### 基本的な使い方
 
-```
-app032-sun-movement/
-├── app/                      # Next.js App Router
-│   ├── layout.tsx           # ルートレイアウト（PWAメタデータ）
-│   ├── page.tsx             # メインページ
-│   └── globals.css          # グローバルスタイル
-├── components/              # Reactコンポーネント
-│   ├── SunCanvas.tsx        # 太陽のCanvas描画
-│   ├── TimeSlider.tsx       # 時刻選択スライダー
-│   ├── LocationSelector.tsx # 位置選択
-│   ├── SunInfo.tsx          # 太陽情報表示
-│   ├── GenerateButton.tsx   # AI生成ボタン
-│   └── AIContentSection.tsx # AI生成コンテンツ表示
-├── lib/                     # ユーティリティ・ロジック
-│   ├── sunPosition.ts       # 太陽位置計算（SunCalc wrapper）
-│   ├── sunDraw.ts           # Canvas描画ロジック
-│   ├── skyColor.ts          # 時間帯別の空の色定義
-│   ├── cities.ts            # 主要都市データ
-│   ├── aiService.ts         # Google AI Studio API統合
-│   └── storage.ts           # ローカルストレージ管理
-├── hooks/                   # カスタムフック
-│   ├── useSunPosition.ts    # 太陽位置計算フック
-│   └── useAIGeneration.ts   # AI生成フック
-├── types/                   # TypeScript型定義
-│   └── sun.ts               # 太陽関連の型
-├── __tests__/               # テストファイル
-│   ├── lib/                 # ライブラリテスト
-│   ├── hooks/               # フックテスト
-│   └── components/          # コンポーネントテスト
-└── public/                  # 静的ファイル
-    ├── manifest.json        # PWA マニフェスト
-    ├── icon-192.png         # アプリアイコン
-    └── icon-512.png         # アプリアイコン
-```
+1. **都市の選択**: プリセットされた17都市から選択するか、緯度経度を直接入力します。
+2. **日時の設定**: カレンダーとスライダーを使って、確認したい日時を設定します。
+3. **シミュレーション**: 時間スライダーを動かすと、太陽の位置と空の色がリアルタイムに変化します。
 
-## 🧪 テスト
+### AI機能の活用
 
-### 全テスト実行
+1. 右上の「⚙️ APIキー設定」からGoogle Gemini APIキーを保存します。
+2. 「✨ AI情報を生成」ボタンをクリックすると、その場所・日時に合わせた以下の情報を生成します：
+    - 豆知識
+    - ユーザーへのメッセージ
+    - UV対策アドバイス
+    - 撮影アドバイス
 
-```bash
-npm test
-```
+### PWAとしてインストール
 
-### カバレッジ付きテスト
+このアプリはPWAに対応しています。ブラウザのアドレスバーにあるインストールアイコンをクリックすることで、デスクトップアプリやスマホアプリとしてインストールできます。オフラインでも基本的な計算機能は動作します。
 
-```bash
-npm test -- --coverage
-```
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### テスト結果
+<!-- ROADMAP -->
+## Roadmap
 
-- **テストスイート**: 6 passed
-- **テスト**: 31 passed, 1 skipped
-- **カバレッジ**: 80%以上（主要ロジック）
+- [x] **Phase 0: 環境構築** (Next.js, TypeScript, Tailwind CSS)
+- [x] **Phase 1: 計算ロジック** (SunCalc.js統合, 17都市データ)
+- [x] **Phase 2: Canvas描画** (空の色変化, 太陽軌跡, 発光効果)
+- [x] **Phase 3: UI実装** (日時選択, 都市選択, 情報表示)
+- [x] **Phase 4: AI機能** (Google Gemini API統合)
+- [x] **Phase 5: ストレージ** (設定の永続化)
+- [x] **Phase 6: PWA対応** (オフライン動作, インストール対応)
+- [ ] **Future**: 3D表示モード
+- [ ] **Future**: 月の動きの追加
 
-## 🏗️ ビルド
+See the [open issues](https://github.com/yourusername/app032-sun-movement/issues) for a full list of proposed features (and known issues).
 
-### プロダクションビルド
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-```bash
-npm run build
-```
+<!-- CONTRIBUTING -->
+## Contributing
 
-### プロダクションサーバー起動
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
-```bash
-npm start
-```
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📱 PWA機能
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-このアプリはPWA（Progressive Web App）として動作します：
+<!-- LICENSE -->
+## License
 
-- ✅ **オフライン動作** - 太陽の計算はオフラインでも可能（AI生成はオンライン必須）
-- ✅ **インストール可能** - ホーム画面に追加してアプリとして使用可能
-- ✅ **レスポンシブデザイン** - モバイル・タブレット・デスクトップ対応
+Distributed under the MIT License. See `LICENSE.txt` for more information.
 
-## 🎯 使用例
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### 白夜を体験する
+<!-- CONTACT -->
+## Contact
 
-1. 位置選択で「トロムソ」を選択
-2. 日付を6月21日（夏至）に設定
-3. 時刻スライダーを動かして、太陽が沈まない様子を確認
+クロ (Kuro) - Project Lead
 
-### 極夜を体験する
+Project Link: [https://github.com/yourusername/app032-sun-movement](https://github.com/yourusername/app032-sun-movement)
 
-1. 位置選択で「トロムソ」を選択
-2. 日付を12月22日（冬至）に設定
-3. 太陽が昇らない（極夜）の表示を確認
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### 季節による昼の長さの違い
+<!-- ACKNOWLEDGMENTS -->
+## Acknowledgments
 
-1. 東京を選択
-2. 6月21日（夏至）と12月22日（冬至）を比較
-3. 昼の長さの差（約5時間）を確認
+* [SunCalc.js](https://github.com/mourner/suncalc) - 太陽位置計算ライブラリ
+* [Google AI Studio](https://aistudio.google.com/) - Gemini API
+* [Next.js](https://nextjs.org/)
+* [Tailwind CSS](https://tailwindcss.com/)
+* [React Icons](https://react-icons.github.io/react-icons/)
 
-## 📊 開発履歴
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### Phase 0: テスト環境構築 ✅
-- Next.js + TypeScript + Tailwind CSSセットアップ
-- Jest + React Testing Library設定
-
-### Phase 1: 太陽位置計算ロジック ✅
-- SunCalc.js統合
-- 17都市の緯度経度データ
-- 白夜・極夜対応
-
-### Phase 2: Canvas描画 ✅
-- 時間帯別の空の色（5パターン）
-- 太陽の描画（発光効果付き）
-- 太陽の軌跡表示
-
-### Phase 3: UI実装 ✅
-- 日付・時刻選択
-- 位置選択（都市/緯度経度）
-- 太陽情報表示
-
-### Phase 4: AI生成機能 ✅
-- Google AI Studio API統合
-- 4種類のコンテンツ生成
-- ローディング・エラーハンドリング
-
-### Phase 5: ローカルストレージ ✅
-- APIキー永続化
-- 位置情報保存
-- お気に入り管理
-
-### Phase 6: PWA対応 ✅
-- next-pwa統合
-- manifest.json作成
-- Service Worker自動生成
-
-## 🤝 コントリビューション
-
-このプロジェクトは学習・実験目的で作成されています。
-
-## 📄 ライセンス
-
-MIT License
-
-## 🙏 謝辞
-
-- **SunCalc.js** - 正確な太陽位置計算ライブラリ
-- **Google AI Studio** - Gemini AI API
-- **Next.js team** - 素晴らしいReactフレームワーク
-
----
-
-**作成者**: クロ
-**作成日**: 2025年1月13日
-**バージョン**: 1.0.0
+<!-- MARKDOWN LINKS & IMAGES -->
+[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
+[license-url]: https://github.com/yourusername/app032-sun-movement/blob/master/LICENSE.txt
+[product-screenshot]: public/images/screenshot.png
+[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
+[Next-url]: https://nextjs.org/
+[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
+[React-url]: https://reactjs.org/
+[TypeScript]: https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white
+[TypeScript-url]: https://www.typescriptlang.org/
+[TailwindCSS]: https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white
+[TailwindCSS-url]: https://tailwindcss.com/
+[SunCalc]: https://img.shields.io/badge/SunCalc-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black
+[SunCalc-url]: https://github.com/mourner/suncalc
+[Gemini]: https://img.shields.io/badge/Google%20Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white
+[Gemini-url]: https://deepmind.google/technologies/gemini/
