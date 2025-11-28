@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useMemo, useState } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { calculateSunPosition } from '@/lib/sunPosition';
 import {
   drawSky,
@@ -22,17 +22,9 @@ interface SunCanvasProps {
   height?: number;
   viewAzimuth?: number;
   fov?: number;
-  onViewAzimuthChange?: (azimuth: number) => void;
-  followSun?: boolean;
-  autoCamera?: boolean;
   showSunPath?: boolean;
   showAltitudeScale?: boolean;
 }
-
-const normalizeAngle = (value: number) => {
-  const normalized = value % 360;
-  return normalized < 0 ? normalized + 360 : normalized;
-};
 
 /**
  * 太陽のCanvas描画コンポーネント
@@ -46,9 +38,6 @@ export default function SunCanvas({
   height = 400,
   viewAzimuth = 180,
   fov = 100,
-  onViewAzimuthChange,
-  followSun = false,
-  autoCamera = true,
   showSunPath = true,
   showAltitudeScale = true,
   timeZone,

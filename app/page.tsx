@@ -242,8 +242,6 @@ export default function Home() {
             width={800}
             height={500}
             viewAzimuth={viewAzimuth}
-            onViewAzimuthChange={setViewAzimuth}
-            followSun={followSun}
             timeZone={timeZone}
             showSunPath={showSunPath}
             showAltitudeScale={showAltitudeScale}
