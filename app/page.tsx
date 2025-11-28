@@ -21,6 +21,7 @@ export default function Home() {
   const [viewAzimuth, setViewAzimuth] = useState(180);
   const [followSun, setFollowSun] = useState(false);
   const [showSunPath, setShowSunPath] = useState(true);
+  const [showAltitudeScale, setShowAltitudeScale] = useState(true);
 
   // 太陽位置計算フック
   const {
@@ -66,11 +67,49 @@ export default function Home() {
     setSelectedCity(city);
     setLocation(city.latitude, city.longitude);
     setTimeZone(city.timezone);
+
+    // 南半球の場合は北（0度）、北半球の場合は南（180度）を向く
+    if (city.latitude < 0) {
+      setViewAzimuth(0);
+    } else {
+      setViewAzimuth(180);
+    }
   };
 
   // カスタム位置ハンドラ
   const handleCustomLocation = (lat: number, lon: number) => {
     setLocation(lat, lon);
+
+    // 経度からタイムゾーンを簡易推定
+    let estimatedTimeZone = "UTC";
+    const offset = Math.round(lon / 15);
+
+    if (offset === 9) estimatedTimeZone = "Asia/Tokyo";
+    else if (offset === 8) estimatedTimeZone = "Asia/Taipei";
+    else if (offset === 10) estimatedTimeZone = "Australia/Sydney";
+    else if (offset === 0) estimatedTimeZone = "UTC";
+    else if (offset === 1) estimatedTimeZone = "Europe/London";
+    else if (offset === -5) estimatedTimeZone = "America/New_York";
+    // その他の地域はUTCオフセット表示ができればベストだが、ここでは簡易的にUTCまたは代表的な都市に倒す
+    // 必要に応じて追加可能
+
+    // カスタム都市として設定
+    setSelectedCity({
+      name: "Custom Location",
+      nameEn: "Custom Location",
+      latitude: lat,
+      longitude: lon,
+      timezone: estimatedTimeZone
+    });
+
+    setTimeZone(estimatedTimeZone);
+
+    // 南半球の場合は北（0度）、北半球の場合は南（180度）を向く
+    if (lat < 0) {
+      setViewAzimuth(0);
+    } else {
+      setViewAzimuth(180);
+    }
   };
 
   // 日付変更ハンドラ
@@ -119,33 +158,41 @@ export default function Home() {
   }, [followSun, sunData.azimuth]);
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <main
+      className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed p-4 md:p-8"
+      style={{ backgroundImage: "url('/background.png')" }}
+    >
+      <div className="max-w-7xl mx-auto space-y-4">
         {/* ヘッダー */}
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800">
-            ☀️ 太陽の動き表示
-          </h1>
-          <p className="text-gray-600">
-            世界各地の太陽の動きをビジュアル化
-          </p>
-        </div>
-
-        {/* APIキー設定ボタン */}
-        <div className="text-center">
-          <button
-            onClick={() => setShowApiKeyInput(!showApiKeyInput)}
-            className="text-sm text-blue-600 hover:text-blue-800 underline"
-          >
-            {showApiKeyInput ? '設定を閉じる' : '⚙️ APIキー設定'}
-          </button>
+        <div className="text-center space-y-2 bg-white/70 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white/50">
+          <div className="flex items-center justify-between">
+            <div className="flex-1"></div>
+            <div className="flex-1 text-center">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-800 drop-shadow-sm">
+                ☀️ 太陽の動き表示
+              </h1>
+              <p className="text-sm text-gray-700 font-medium">
+                世界各地の太陽の動きをビジュアル化
+              </p>
+            </div>
+            <div className="flex-1 flex justify-end">
+              <button
+                onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+                className="text-gray-600 hover:text-gray-800 p-2 rounded-lg hover:bg-white/50 transition flex items-center gap-1 text-sm"
+                title="APIキー設定"
+              >
+                <span>⚙️</span>
+                <span className="hidden md:inline">APIキー設定</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* APIキー入力 */}
         {showApiKeyInput && (
-          <div className="bg-white rounded-lg shadow-lg p-6 space-y-4">
-            <h3 className="font-bold text-gray-800">Google AI Studio APIキー設定</h3>
-            <p className="text-sm text-gray-600">
+          <div className="bg-white rounded-lg shadow-lg p-4 space-y-3">
+            <h3 className="font-bold text-gray-800 text-sm">Google AI Studio APIキー設定</h3>
+            <p className="text-xs text-gray-600">
               <a
                 href="https://aistudio.google.com/app/apikey"
                 target="_blank"
@@ -161,105 +208,33 @@ export default function Home() {
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="APIキーを入力"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <button
-              onClick={handleApiKeySave}
-              className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-            >
-              保存
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={handleApiKeySave}
+                className="flex-1 px-3 py-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+              >
+                保存
+              </button>
+              {localStorage.getItem('sun-app-api-key') && (
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('sun-app-api-key');
+                    setApiKey('');
+                    alert('APIキーを削除しました');
+                  }}
+                  className="px-3 py-2 text-sm bg-red-100 text-red-600 rounded-md hover:bg-red-200 transition"
+                >
+                  削除
+                </button>
+              )}
+            </div>
           </div>
         )}
 
-        {/* コントロールパネル */}
-        <div className="bg-white rounded-lg shadow-lg p-6 space-y-6">
-          {/* 日付選択 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              📅 日付
-            </label>
-            <input
-              type="date"
-              value={formatDateForInput(date)}
-              onChange={handleDateChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          {/* 時刻選択 */}
-          <TimeSlider time={time} onChange={setTime} />
-
-          {/* アニメーションコントロール */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              🎬 アニメーション
-            </label>
-            <AnimationControls time={time} onTimeChange={setTime} />
-          </div>
-
-          {/* 視点コントロール */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              🧭 視点方向
-            </label>
-            <div className="flex items-center gap-3 mb-2">
-              <label className="flex items-center gap-2 text-sm text-gray-700">
-                <input
-                  type="checkbox"
-                  checked={followSun}
-                  onChange={(e) => setFollowSun(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                太陽に追従
-              </label>
-              {followSun && (
-                <span className="text-xs text-blue-600">視点は太陽の方位に固定中</span>
-              )}
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-700 mb-2">
-              <input
-                type="checkbox"
-                checked={showSunPath}
-                onChange={(e) => setShowSunPath(e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              軌跡を表示
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="360"
-              step="1"
-              value={viewAzimuth}
-              onChange={(e) => setViewAzimuth(parseInt(e.target.value, 10))}
-              disabled={followSun}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
-            />
-            <div className="flex justify-between text-xs text-gray-600 mt-1">
-              <span>
-                向き: {formattedDirection}
-              </span>
-              <span>{Math.round(viewAzimuth)}°</span>
-            </div>
-            <p className="text-xs text-gray-500 mt-1">
-              キャンバスをドラッグして視点を回転できます
-              {followSun && '（追従中は無効）'}
-            </p>
-          </div>
-
-          {/* 位置選択 */}
-          <LocationSelector
-            selectedCity={selectedCity}
-            customLatitude={latitude}
-            customLongitude={longitude}
-            onCitySelect={handleCitySelect}
-            onCustomLocation={handleCustomLocation}
-          />
-        </div>
-
-        {/* Canvas表示 */}
-        <div className="flex justify-center">
+        {/* Canvas表示（最上部） */}
+        <div className="flex justify-center bg-white rounded-lg shadow-lg p-2">
           <SunCanvas
             date={date}
             time={time}
@@ -272,10 +247,107 @@ export default function Home() {
             followSun={followSun}
             timeZone={timeZone}
             showSunPath={showSunPath}
+            showAltitudeScale={showAltitudeScale}
           />
         </div>
 
-        {/* 太陽情報 */}
+        {/* コントロールパネル - 2カラムレイアウト */}
+        <div className="bg-white rounded-lg shadow-lg p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* 左列：時刻・日付・アニメーション */}
+            <div className="space-y-3">
+              {/* 時刻選択 */}
+              <TimeSlider time={time} onChange={setTime} />
+
+              {/* 日付選択 */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  📅 日付
+                </label>
+                <input
+                  type="date"
+                  value={formatDateForInput(date)}
+                  onChange={handleDateChange}
+                  className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* アニメーションコントロール（時刻の下） */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  🎬 アニメーション
+                </label>
+                <AnimationControls time={time} onTimeChange={setTime} />
+              </div>
+            </div>
+
+            {/* 右列：視点・位置 */}
+            <div className="space-y-3">
+              {/* 視点コントロール */}
+              <div className="w-full space-y-2">
+                <div className="flex justify-between items-center h-[28px]">
+                  <label className="text-sm font-medium text-gray-700">
+                    🧭 視点方向
+                  </label>
+                  <div className="flex items-center gap-3 text-xs">
+                    <label className="flex items-center gap-1.5 text-gray-700 cursor-pointer hover:text-blue-600 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={followSun}
+                        onChange={(e) => setFollowSun(e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                      太陽に追従
+                    </label>
+                    <label className="flex items-center gap-1.5 text-gray-700 cursor-pointer hover:text-blue-600 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={showSunPath}
+                        onChange={(e) => setShowSunPath(e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                      軌跡を表示
+                    </label>
+                    <label className="flex items-center gap-1.5 text-gray-700 cursor-pointer hover:text-blue-600 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={showAltitudeScale}
+                        onChange={(e) => setShowAltitudeScale(e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                      高度目盛り
+                    </label>
+                  </div>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="360"
+                  step="1"
+                  value={viewAzimuth}
+                  onChange={(e) => setViewAzimuth(parseInt(e.target.value, 10))}
+                  disabled={followSun}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                />
+                <div className="flex justify-between text-xs text-gray-600">
+                  <span>向き: {formattedDirection}</span>
+                  <span>{Math.round(viewAzimuth)}°</span>
+                </div>
+              </div>
+
+              {/* 位置選択（視点の下） */}
+              <LocationSelector
+                selectedCity={selectedCity}
+                customLatitude={latitude}
+                customLongitude={longitude}
+                onCitySelect={handleCitySelect}
+                onCustomLocation={handleCustomLocation}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 太陽情報（最下部） */}
         <SunInfo
           sunData={sunData}
           polarCondition={polarCondition}
@@ -284,8 +356,8 @@ export default function Home() {
         />
 
         {/* AI生成セクション */}
-        <div className="bg-white rounded-lg shadow-lg p-6 space-y-6">
-          <h2 className="text-2xl font-bold text-gray-800 text-center">
+        <div className="bg-white rounded-lg shadow-lg p-4 space-y-4">
+          <h2 className="text-xl font-bold text-gray-800 text-center">
             🤖 AI生成コンテンツ
           </h2>
 
@@ -295,7 +367,7 @@ export default function Home() {
         </div>
 
         {/* フッター */}
-        <div className="text-center text-sm text-gray-500 py-4">
+        <div className="text-center text-sm text-gray-600 py-4 bg-white/50 backdrop-blur-sm rounded-lg mx-auto max-w-2xl">
           <p>
             計算ライブラリ: SunCalc.js | AI: Google Gemini |
             データは参考値です

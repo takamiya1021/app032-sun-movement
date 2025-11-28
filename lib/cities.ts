@@ -17,6 +17,8 @@ export const MAJOR_CITIES: City[] = [
   { name: '東京', nameEn: 'Tokyo', latitude: 35.6762, longitude: 139.6503, timezone: 'Asia/Tokyo' },
   { name: 'ロンドン', nameEn: 'London', latitude: 51.5074, longitude: -0.1278, timezone: 'Europe/London' },
   { name: 'ニューヨーク', nameEn: 'New York', latitude: 40.7128, longitude: -74.0060, timezone: 'America/New_York' },
+  { name: '嘉義 (北回帰線)', nameEn: 'Chiayi (Tropic of Cancer)', latitude: 23.4583, longitude: 120.4167, timezone: 'Asia/Taipei' },
+  { name: 'アリススプリングス (南回帰線)', nameEn: 'Alice Springs (Tropic of Capricorn)', latitude: -23.6980, longitude: 133.8807, timezone: 'Australia/Darwin' },
   { name: 'シドニー', nameEn: 'Sydney', latitude: -33.8688, longitude: 151.2093, timezone: 'Australia/Sydney' },
   { name: '北京', nameEn: 'Beijing', latitude: 39.9042, longitude: 116.4074, timezone: 'Asia/Shanghai' },
   { name: 'シンガポール', nameEn: 'Singapore', latitude: 1.3521, longitude: 103.8198, timezone: 'Asia/Singapore' },

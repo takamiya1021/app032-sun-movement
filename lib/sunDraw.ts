@@ -1,5 +1,5 @@
 import { getSkyPhase, getSkyColors } from './skyColor';
-import { calculateCardinalPoints, type Viewport } from './horizonProjection';
+import { calculateCardinalPoints, horizontalToScreen, type Viewport } from './horizonProjection';
 
 /**
  * 位置の型定義
@@ -36,8 +36,8 @@ export function drawSky(
   const colors = getSkyColors(skyPhase);
 
   // 縦方向グラデーション（天頂から地平線へ）
-  // 地平線は下部60%あたりに配置されるため、そこまでグラデーション
-  const gradient = ctx.createLinearGradient(0, 0, 0, height * 0.8);
+  // 地平線は下部87.5%あたりに配置されるため、そこまでグラデーション
+  const gradient = ctx.createLinearGradient(0, 0, 0, height * 0.875);
   colors.forEach((color, index) => {
     gradient.addColorStop(index / (colors.length - 1), color);
   });
@@ -68,14 +68,14 @@ export function drawSky(
   // 地平線下部は少し暗くする
   const groundGradient = ctx.createLinearGradient(
     highlightX - width * 0.1,
-    height * 0.6,
+    height * 0.875,
     highlightX + width * 0.1,
     height
   );
   groundGradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
   groundGradient.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
   ctx.fillStyle = groundGradient;
-  ctx.fillRect(0, height * 0.6, width, height * 0.4);
+  ctx.fillRect(0, height * 0.875, width, height * 0.125);
 }
 
 /**
@@ -243,8 +243,8 @@ export function calculateSunPositionOnCanvas(
   // 高度を0-90度の範囲に正規化（負の値は地平線下なので地平線上として扱う）
   const clampedAltitude = Math.max(0, Math.min(90, altitude));
 
-  // Y座標: 高度が高いほど上に（0度=地平線=height*0.8、90度=天頂=height*0.1）
-  const y = height * (0.8 - (clampedAltitude / 90) * 0.7);
+  // Y座標: 高度が高いほど上に（0度=地平線=height*0.875、90度=天頂=height*0.1）
+  const y = height * (0.875 - (clampedAltitude / 90) * 0.775);
 
   // X座標: 方位角から計算（90度=東=左、270度=西=右）
   // 方位角を-90度シフトして、90度（東）を0度として扱う
@@ -271,8 +271,8 @@ export function drawHorizon(
   canvasWidth: number,
   canvasHeight: number
 ): void {
-  // 地平線は画面下部80%の位置に固定
-  const horizonY = canvasHeight * 0.8;
+  // 地平線は画面下部87.5%の位置に固定
+  const horizonY = canvasHeight * 0.875;
 
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
   ctx.lineWidth = 2;
@@ -320,57 +320,112 @@ export function drawCardinalDirections(
   });
 }
 
+
 /**
- * 山のシルエットを描画
+ * 風景画像（地面のテクスチャ）を描画
  *
  * @param ctx - Canvas 2Dコンテキスト
+ * @param image - 描画する画像オブジェクト
  * @param viewport - ビューポート設定
  * @param canvasWidth - Canvas幅
  * @param canvasHeight - Canvas高さ
  */
-export function drawMountainSilhouettes(
+export function drawLandscapeImage(
   ctx: CanvasRenderingContext2D,
+  image: HTMLImageElement,
   viewport: Viewport,
   canvasWidth: number,
   canvasHeight: number
 ): void {
-  // 地平線は画面下部80%の位置
-  const horizonY = canvasHeight * 0.8;
+  const horizonY = canvasHeight * 0.875;
   const diffFromSouth = shortestAngle(viewport.centerAzimuth - 180);
   const pixelsPerDegree = canvasWidth / viewport.fov;
+
+  // 画像の表示サイズ計算
+  // 拡大禁止：画像は元のサイズまたは縮小のみ
+  const scale = Math.min(1, canvasWidth / image.width); // 最大でも等倍まで
+  const drawWidth = image.width * scale;
+  const drawHeight = image.height * scale;
+
+  // 画像のY位置（地平線に合わせる）
+  // 画像の上端を地平線（horizonY）に合わせる
+  const drawY = horizonY;
+
+  // X方向のオフセット（南を基準に）
   const offset = diffFromSouth * pixelsPerDegree;
-  const repeats = [-1, 0, 1];
 
-  // 山のパターン（固定）
-  const mountains = [
-    { xRatio: 0.15, height: 80, width: 120 },  // 左側の山
-    { xRatio: 0.35, height: 120, width: 150 }, // 左中央の高い山
-    { xRatio: 0.55, height: 60, width: 100 },  // 中央の低い山
-    { xRatio: 0.75, height: 100, width: 140 }, // 右中央の山
-    { xRatio: 0.90, height: 70, width: 110 },  // 右側の山
-  ];
+  // 画像を繰り返し描画してパノラマ効果を作る
+  // つなぎ目を自然にするため、奇数番目のタイルは左右反転して描画（ミラーリング）
+  const startX = -drawWidth - (offset % drawWidth);
 
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+  for (let x = startX; x < canvasWidth; x += drawWidth) {
+    // タイルのインデックスを計算（世界座標系での位置）
+    // x + offset が世界座標でのピクセル位置
+    // 多少の誤差を考慮して Math.round を使用
+    const tileIndex = Math.floor(Math.round(x + offset) / Math.round(drawWidth));
 
-  repeats.forEach((repeatIndex) => {
-    mountains.forEach((mountain) => {
-      const patternWidth = canvasWidth;
-      const shift = repeatIndex * patternWidth - offset;
-      const x = canvasWidth * mountain.xRatio + shift;
-      const baseY = horizonY;
-      const peakY = baseY - mountain.height;
-      const halfWidth = mountain.width / 2;
+    ctx.save();
+    if (Math.abs(tileIndex) % 2 !== 0) {
+      // 奇数番目は左右反転
+      ctx.translate(x + drawWidth, drawY);
+      ctx.scale(-1, 1);
+      ctx.drawImage(image, 0, 0, drawWidth, drawHeight);
+    } else {
+      // 偶数番目はそのまま
+      ctx.drawImage(image, x, drawY, drawWidth, drawHeight);
+    }
+    ctx.restore();
+  }
+}
 
-      if (x + halfWidth < -canvasWidth || x - halfWidth > canvasWidth * 2) {
-        return;
+/**
+ * 高度目盛りを描画（0-90度）
+ *
+ * @param ctx - Canvas 2Dコンテキスト
+ * @param viewport - ビューポート設定
+ * @param width - Canvas幅
+ * @param height - Canvas高さ
+ */
+export function drawAltitudeScale(
+  ctx: CanvasRenderingContext2D,
+  viewport: Viewport,
+  width: number,
+  height: number
+): void {
+  try {
+    const centerAzimuth = viewport.centerAzimuth;
+
+    // 白色で控えめに表示
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.font = 'bold 12px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+
+    // console.log('Drawing Altitude Scale', { centerAzimuth, width, height });
+
+    // 10度刻みで目盛りを描画
+    for (let alt = 0; alt <= 90; alt += 10) {
+      const pos = horizontalToScreen(centerAzimuth, alt, viewport, width, height);
+
+      if (pos) {
+        const y = pos.y;
+        // console.log(`Alt: ${alt}, Y: ${y}`);
+
+        // 目盛り線
+        ctx.beginPath();
+        ctx.moveTo(5, y);
+        ctx.lineTo(20, y);
+        ctx.stroke();
+
+        // 数値
+        ctx.fillText(`${alt}°`, 25, y);
+      } else {
+        // console.log(`Alt: ${alt} is off-screen`);
       }
-
-      ctx.beginPath();
-      ctx.moveTo(x - halfWidth, baseY);
-      ctx.lineTo(x, peakY);
-      ctx.lineTo(x + halfWidth, baseY);
-      ctx.closePath();
-      ctx.fill();
-    });
-  });
+    }
+  } catch (e) {
+    console.error('Error in drawAltitudeScale:', e);
+  }
 }

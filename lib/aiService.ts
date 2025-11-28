@@ -3,7 +3,7 @@ import type { SunPositionData, AIContent } from '@/types/sun';
 /**
  * Google AI Studio API（Gemini）のエンドポイント
  */
-const GEMINI_API_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+const GEMINI_API_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 /**
  * 太陽の豆知識を生成するプロンプト
@@ -99,7 +99,6 @@ async function callGeminiAPI(prompt: string, apiKey: string): Promise<string> {
       ],
       generationConfig: {
         temperature: 0.7,
-        maxOutputTokens: 500,
       },
     }),
   });
@@ -118,7 +117,19 @@ async function callGeminiAPI(prompt: string, apiKey: string): Promise<string> {
     }
   }
 
-  throw new Error('APIレスポンスが不正です');
+  // エラー詳細の特定
+  let errorDetail = '候補が返されませんでした';
+  if (data.promptFeedback) {
+    if (data.promptFeedback.blockReason) {
+      errorDetail = `ブロックされました: ${data.promptFeedback.blockReason}`;
+    }
+  }
+  if (data.candidates && data.candidates.length > 0 && data.candidates[0].finishReason) {
+    errorDetail = `終了理由: ${data.candidates[0].finishReason}`;
+  }
+
+  console.error('Gemini API Error Data:', data);
+  throw new Error(`APIレスポンスが不正です (${errorDetail})`);
 }
 
 /**

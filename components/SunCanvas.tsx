@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import { calculateSunPosition } from '@/lib/sunPosition';
 import {
   drawSky,
   drawSun,
   drawHorizon,
   drawCardinalDirections,
-  drawMountainSilhouettes,
+  drawAltitudeScale,
   type Position,
 } from '@/lib/sunDraw';
 import { horizontalToScreen, DEFAULT_VIEWPORT, type Viewport } from '@/lib/horizonProjection';
@@ -26,35 +26,7 @@ interface SunCanvasProps {
   followSun?: boolean;
   autoCamera?: boolean;
   showSunPath?: boolean;
-}
-
-const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
-
-function computeCameraTilt(altitude: number): number {
-  if (altitude < -10) {
-    return -12;
-  }
-  if (altitude < 5) {
-    return altitude * 0.5 - 4;
-  }
-  if (altitude < 45) {
-    return -1 + (altitude - 5) * 0.8;
-  }
-  if (altitude < 70) {
-    return 31 + (altitude - 45) * 0.9;
-  }
-  return 53 + (altitude - 70) * 0.6;
-}
-
-function computeDynamicFov(altitude: number, baseFov: number): number {
-  const maxFov = clamp(baseFov, 90, 130);
-  const minFov = 68;
-  if (altitude <= 0) {
-    return maxFov;
-  }
-  const ratio = Math.min(altitude / 90, 1);
-  const adjusted = maxFov - (maxFov - minFov) * ratio;
-  return clamp(adjusted, minFov, maxFov);
+  showAltitudeScale?: boolean;
 }
 
 const normalizeAngle = (value: number) => {
@@ -73,11 +45,12 @@ export default function SunCanvas({
   width = 600,
   height = 400,
   viewAzimuth = 180,
-  fov = 120,
+  fov = 100,
   onViewAzimuthChange,
   followSun = false,
   autoCamera = true,
   showSunPath = true,
+  showAltitudeScale = true,
   timeZone,
 }: SunCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -92,16 +65,20 @@ export default function SunCanvas({
   }, [viewAzimuth]);
 
   const viewport = useMemo<Viewport>(() => {
-    const tilt = autoCamera ? computeCameraTilt(sunData.altitude) : DEFAULT_VIEWPORT.centerAltitude;
-    const dynamicFov = autoCamera ? computeDynamicFov(sunData.altitude, fov) : fov;
+    // 地平線を画面下部87.5%（下から1/8）に配置するためのチルト角を計算
+    const fovRad = (fov * Math.PI) / 180;
+    const focalLength = 1 / Math.tan(fovRad / 2);
+    const targetYProj = 0.75;
+    const requiredTiltRad = Math.atan(targetYProj / focalLength);
+    const requiredTilt = (requiredTiltRad * 180) / Math.PI;
 
     return {
       ...DEFAULT_VIEWPORT,
       centerAzimuth: viewAzimuth,
-      centerAltitude: clamp(tilt, -10, 50),
-      fov: dynamicFov,
+      centerAltitude: requiredTilt,
+      fov: fov,
     };
-  }, [viewAzimuth, fov, autoCamera, sunData.altitude]);
+  }, [viewAzimuth, fov]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -119,12 +96,8 @@ export default function SunCanvas({
     // 空を描画
     drawSky(ctx, width, height, time, sunData.altitude, viewport);
 
-    // 地平線と方位を描画（3D投影）
+    // 地平線を描画（3D投影）
     drawHorizon(ctx, viewport, width, height);
-    drawCardinalDirections(ctx, viewport, width, height);
-
-    // 山のシルエットを描画
-    drawMountainSilhouettes(ctx, viewport, width, height);
 
     // 太陽の軌跡を描画（1時間ごとの位置）
     if (showSunPath) {
@@ -155,53 +128,15 @@ export default function SunCanvas({
         drawSun(ctx, position, sunData.altitude);
       }
     }
-  }, [sunData, width, height, viewport, time, date, latitude, longitude, showSunPath, timeZone]);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !onViewAzimuthChange || followSun) return;
+    // 方位を描画（最後に描画して、地面の上に表示）
+    drawCardinalDirections(ctx, viewport, width, height);
 
-    let isDragging = false;
-    let lastX = 0;
-
-    const handlePointerDown = (event: PointerEvent) => {
-      isDragging = true;
-      lastX = event.clientX;
-      canvas.setPointerCapture?.(event.pointerId);
-    };
-
-    const handlePointerMove = (event: PointerEvent) => {
-      if (!isDragging) return;
-      const deltaX = event.clientX - lastX;
-      lastX = event.clientX;
-
-      const degreesPerPixel = fov / width;
-      const deltaDegrees = deltaX * degreesPerPixel;
-      const nextAzimuth = normalizeAngle(azimuthRef.current + deltaDegrees);
-      azimuthRef.current = nextAzimuth;
-      onViewAzimuthChange(nextAzimuth);
-    };
-
-    const stopDragging = (event: PointerEvent) => {
-      if (!isDragging) return;
-      isDragging = false;
-      canvas.releasePointerCapture?.(event.pointerId);
-    };
-
-    canvas.addEventListener('pointerdown', handlePointerDown);
-    canvas.addEventListener('pointermove', handlePointerMove);
-    canvas.addEventListener('pointerup', stopDragging);
-    canvas.addEventListener('pointerleave', stopDragging);
-    canvas.addEventListener('pointercancel', stopDragging);
-
-    return () => {
-      canvas.removeEventListener('pointerdown', handlePointerDown);
-      canvas.removeEventListener('pointermove', handlePointerMove);
-      canvas.removeEventListener('pointerup', stopDragging);
-      canvas.removeEventListener('pointerleave', stopDragging);
-      canvas.removeEventListener('pointercancel', stopDragging);
-    };
-  }, [onViewAzimuthChange, fov, width, followSun]);
+    // 高度目盛りを描画（最前面に表示、オプション）
+    if (showAltitudeScale) {
+      drawAltitudeScale(ctx, viewport, width, height);
+    }
+  }, [sunData, width, height, viewport, time, date, latitude, longitude, showSunPath, timeZone, showAltitudeScale]);
 
   /**
    * 太陽の軌跡を3D投影で描画
@@ -226,10 +161,13 @@ export default function SunCanvas({
       currentSegment = [];
     };
 
-    const step = 0.5;
+    const step = 0.1; // 精度向上のためステップを細かくする（6分刻み）
     for (let hour = 0; hour <= 24; hour += step) {
       const sunData = calculateSunPosition(date, hour, latitude, longitude, timeZone);
       if (sunData.altitude > -6) {
+        // 画面外（カメラの後ろなど）の判定を厳密に行うため、
+        // horizontalToScreenの戻り値だけでなく、投影前の座標も考慮したいが、
+        // ここでは簡易的にhorizontalToScreenのnull判定と、点間の距離チェックで対応
         const pos = horizontalToScreen(
           sunData.azimuth,
           sunData.altitude,
@@ -237,10 +175,14 @@ export default function SunCanvas({
           width,
           height
         );
+
         if (pos) {
           currentSegment.push({ x: pos.x, y: pos.y });
-        } else if (currentSegment.length) {
-          pushSegment();
+        } else {
+          // 投影できない（視野外/カメラ後ろ）場合はセグメントを切る
+          if (currentSegment.length) {
+            pushSegment();
+          }
         }
       } else if (currentSegment.length) {
         pushSegment();
@@ -260,10 +202,25 @@ export default function SunCanvas({
     ctx.setLineDash([5, 5]);
 
     segments.forEach((segment) => {
+      if (segment.length < 2) return;
+
       ctx.beginPath();
       ctx.moveTo(segment[0].x, segment[0].y);
+
       for (let i = 1; i < segment.length; i++) {
-        ctx.lineTo(segment[i].x, segment[i].y);
+        const p1 = segment[i - 1];
+        const p2 = segment[i];
+
+        // 点と点の距離が離れすぎている場合（画面幅の1/4以上）は描画しない
+        // ステップを細かくしたので、許容距離も少し短くする
+        const distSq = (p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2;
+        if (distSq > (width / 4) ** 2) {
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(p2.x, p2.y);
+        } else {
+          ctx.lineTo(p2.x, p2.y);
+        }
       }
       ctx.stroke();
     });

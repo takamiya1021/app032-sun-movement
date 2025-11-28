@@ -22,9 +22,9 @@ export default function TimeSlider({ time, onChange }: TimeSliderProps) {
 
   return (
     <div className="w-full space-y-2">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center h-[28px]">
         <label className="text-sm font-medium text-gray-700">
-          時刻: {formatTime(time)}
+          ⏰ 時刻: {formatTime(time)}
         </label>
         <button
           onClick={handleNowClick}

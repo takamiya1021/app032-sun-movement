@@ -55,53 +55,53 @@ export default function SunInfo({ sunData, polarCondition, timeZone, cityName }:
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 space-y-4">
-      <h3 className="text-lg font-bold text-gray-800 border-b pb-2 flex flex-col">
+    <div className="bg-white rounded-lg shadow-md p-3 space-y-2">
+      <h3 className="text-sm font-bold text-gray-800 border-b pb-1 flex items-center justify-between">
         <span>☀️ 太陽情報</span>
         {cityName && (
-          <span className="text-xs text-gray-500 font-normal">{cityName} 現地時間</span>
+          <span className="text-xs text-gray-500 font-normal">{cityName}</span>
         )}
       </h3>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
+      <div className="grid grid-cols-3 gap-3">
+        <div className="space-y-0.5">
           <div className="text-xs text-gray-500">日の出</div>
-          <div className="text-lg font-semibold text-orange-600">
+          <div className="text-sm font-semibold text-orange-600">
             🌅 {formatTime(sunData.sunrise)}
           </div>
         </div>
 
-        <div className="space-y-1">
-          <div className="text-xs text-gray-500">日の入り</div>
-          <div className="text-lg font-semibold text-orange-600">
-            🌇 {formatTime(sunData.sunset)}
-          </div>
-        </div>
-
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           <div className="text-xs text-gray-500">南中時刻</div>
-          <div className="text-lg font-semibold text-blue-600">
+          <div className="text-sm font-semibold text-blue-600">
             ☀️ {formatTime(sunData.solarNoon)}
           </div>
         </div>
 
-        <div className="space-y-1">
+        <div className="space-y-0.5">
+          <div className="text-xs text-gray-500">日の入り</div>
+          <div className="text-sm font-semibold text-orange-600">
+            🌇 {formatTime(sunData.sunset)}
+          </div>
+        </div>
+
+        <div className="space-y-0.5">
           <div className="text-xs text-gray-500">昼の長さ</div>
-          <div className="text-lg font-semibold text-blue-600">
+          <div className="text-sm font-semibold text-blue-600">
             ⏰ {formatDuration(sunData.dayLength)}
           </div>
         </div>
 
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           <div className="text-xs text-gray-500">太陽高度</div>
-          <div className="text-lg font-semibold text-green-600">
+          <div className="text-sm font-semibold text-green-600">
             📐 {sunData.altitude.toFixed(1)}°
           </div>
         </div>
 
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           <div className="text-xs text-gray-500">方位角</div>
-          <div className="text-lg font-semibold text-green-600">
+          <div className="text-sm font-semibold text-green-600">
             🧭 {sunData.azimuth.toFixed(1)}°
           </div>
         </div>

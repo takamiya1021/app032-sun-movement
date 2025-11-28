@@ -29,7 +29,7 @@ export function calculateSunPosition(
 
   const position = SunCalc.getPosition(dateTime, latitude, longitude);
 
-  const timesDate = makeZonedDate({ year, month, day, hour: 12, minute: 0 }, timeZone);
+  const timesDate = makeZonedDate({ year, month, day, hour: 0, minute: 0 }, timeZone);
   const times = SunCalc.getTimes(timesDate, latitude, longitude);
 
   // ラジアンから度に変換
